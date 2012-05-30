@@ -1,8 +1,9 @@
-public class audioChunk{
+public class AudioChunk{
     AudioFormat format;
     byte[] data;
-    
-    audioChunk(){
+    AudioChunk next;
+   
+    AudioChunk(){
         format = new AudioFormat(44000,8,1,true,true);
         data = new byte[4096];
     }
