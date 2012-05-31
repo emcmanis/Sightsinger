@@ -4,22 +4,27 @@ import java.awt.Dimension;
 
 public class Histogram extends JPanel {
 
+    LinkedBlockingQueue<double[]> queue;
+
     public Histogram() {
         setPreferredSize(new Dimension(512,400)); //w,h in pixels
     }
 
     public void paint(Graphics g) {
-        double[] data = new double[2048];
-        int[] heights = new int[512];
-        int i;
-        //for making up fake data:
-        for(i = 0; i < 2048; i++) {
-            data[i] = ((i*i)/10) % 255;
-        }
-        heights = histHeights(data);
-        for(i = 0; i < 512; i++) {
-            g.drawLine(i,350,i,350-heights[i]);
-        }
+        if(!frame.isStopped()) {
+            double[] data;
+            int[] heights = new int[512];
+            try{
+                data = queue.take();
+            }
+            catch(InterruptedException e) {
+                return;
+            }
+            heights = histHeights(data);
+            for(int i = 0; i < 512; i++) {
+                g.drawLine(i,350,i,350-heights[i]);
+            }
+         }
         g.drawString("frequency",250,5);
     }
 

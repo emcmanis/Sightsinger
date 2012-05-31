@@ -9,16 +9,19 @@ public class DataFrame extends JFrame {
     boolean stopped;
     FFT fft;
     GetAudio audioinput;
+    Histogram hist;
 
     public DataFrame() {
         setTitle("Histogram");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         JButton start = new JButton("Start");
         JButton stop = new JButton("Stop");
-        Histogram hist = new Histogram();
+        hist = new Histogram();
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 stopped = true;
+                fft.interrupt();
+                hist.interrupt();
             }
         }
         );
@@ -27,6 +30,8 @@ public class DataFrame extends JFrame {
                 stopped = false;
                 audioinput = new GetAudio(this);
                 fft = new FFT(this);
+                fft.start();
+                audioinput.start();
             }
         });
         add(start, BorderLayout.NORTH);

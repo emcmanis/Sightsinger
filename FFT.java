@@ -1,7 +1,7 @@
 import java.util.concurrent.LinkedBlockingQueue;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
-public class FFT {
+public class FFT extends Thread {
 
     DoubleFFT_1D fft;
     LinkedBlockingQueue<AudioChunk> queue;
@@ -19,10 +19,10 @@ public class FFT {
     }
 
     //transforms data!
-    public double[] transform(AudioChunk input) {
+    private double[] transform(AudioChunk input) {
         double[] data = new double[4096];
         for(int i = 0; i < 4096; i++) {
-            data[i] = (double)input[i];
+            data[i] = 0.1*(double)input[i];
         }
         fft.realForward(data);
 
@@ -35,7 +35,11 @@ public class FFT {
         return(data);
     } 
 
-    public void process() {
+    public void run() {
+        process();
+    }
+
+    private void process() {
 
         //again stopped is a global bool
 
@@ -45,11 +49,11 @@ public class FFT {
                 input = queue.take();
             }
             catch(InterruptedException e) {
-                //HANDLE IT
+                return;
             }
             double[] data;
             data = transform(input);
-                // hand off to graphics thread
+            frame.hist.enqueue(data);
         }
     }
 }
