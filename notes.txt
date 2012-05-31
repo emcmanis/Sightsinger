@@ -1,0 +1,5 @@
+For the histogram: where do I take from the data to be drawn queue? Can do it in paint, but don't want to be doing it all the time, only when the start button has been pressed and the stopped button has not.
+
+Can I call paint? Or can I get something to call paint? I am confused by Java magic.
+
+In FFT -- how do I shot import?
