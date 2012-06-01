@@ -16,16 +16,18 @@ public class DataFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         JButton start = new JButton("Start");
         JButton stop = new JButton("Stop");
-        hist = new Histogram(this);
+        hist = new Histogram(this);	
         final Thread histthread = new Thread(hist,"histthread");
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 stopped = false;
                 audioinput = new GetAudio(DataFrame.this);
-                fft = new FFT(DataFrame.this);
-                fft.start();
                 audioinput.start(); 
-                histthread.start();
+                if(stopped = false) {
+                    fft = new FFT(DataFrame.this);
+                    fft.start();
+                    histthread.start();
+                }
             }
         });
         stop.addActionListener(new ActionListener() {

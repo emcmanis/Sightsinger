@@ -3,6 +3,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Port;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.LineListener;
+import javax.sound.sampled.LineEvent;
 
 //obtains audio data from the computer's microphone, stores it in an audioChunk for future processing
 
@@ -15,23 +17,43 @@ public class GetAudio extends Thread {
     public GetAudio(DataFrame myframe) {
         output = new AudioChunk();
         frame = myframe;
+    }
+
+    public void setup() {
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, output.format); // format is an AudioFormat object
         if (!AudioSystem.isLineSupported(info)) {
-            System.out.print("Something is wrong with your microphone. Please fix and retry.");
+            System.out.println("Something is wrong with this. Please fix and retry.");
+            System.out.println("microphone: ");
+            System.out.println(AudioSystem.isLineSupported(Port.Info.MICROPHONE));
+            System.out.println("line in: ");
+            System.out.println(AudioSystem.isLineSupported(Port.Info.LINE_IN));
             frame.setStopped(true);
+            frame.setStopped(true);
+            return;
         }
         // Obtain and open the line.
         try {
             line = (TargetDataLine) AudioSystem.getLine(info);
             line.open(output.format);
         } catch (LineUnavailableException ex) {
-            System.out.print("line is unavailable! Please fix and retry.");
+            System.out.println("line is unavailable! Please fix and retry.");
             frame.setStopped(true);
         }
+        line.addLineListener(new LineListener(){
+            public void update(LineEvent event) {
+		if(event.getType() == LineEvent.Type.STOP || event.getType() == LineEvent.Type.CLOSE) {
+	            frame.setStopped(true);
+                }
+            }
+        });
     }
 
     public void run() {
-        record();
+        setup();
+        if(!frame.isStopped()) {
+            System.out.println("this should not be printing");
+            record();
+        }
     }
 
     private void record() {
