@@ -22,7 +22,7 @@ public class FFT extends Thread {
     private double[] transform(AudioChunk input) {
         double[] data = new double[4096];
         for(int i = 0; i < 4096; i++) {
-            data[i] = 0.1*(double)input[i];
+            data[i] = 0.1*(double)input.data[i];
         }
         fft.realForward(data);
 

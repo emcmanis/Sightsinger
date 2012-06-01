@@ -1,30 +1,44 @@
 import javax.swing.JPanel;
 import java.awt.Graphics;
 import java.awt.Dimension;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class Histogram extends JPanel {
+public class Histogram extends JPanel implements Runnable {
 
     LinkedBlockingQueue<double[]> queue;
+    double[] data;
+    int[] toprint;
+    DataFrame frame;
 
-    public Histogram() {
+    public Histogram(DataFrame myframe) {
+        frame = myframe;
+        data = new double[4096];
+        toprint = new int[512];
+        queue = new LinkedBlockingQueue<double[]>();
         setPreferredSize(new Dimension(512,400)); //w,h in pixels
     }
 
-    public void paint(Graphics g) {
-        if(!frame.isStopped()) {
-            double[] data;
-            int[] heights = new int[512];
-            try{
+    public void enqueue(double[] stuff) {
+        queue.add(stuff);
+    }
+
+    public void run() {
+        while(!frame.isStopped()) {
+            try {
                 data = queue.take();
             }
             catch(InterruptedException e) {
                 return;
             }
-            heights = histHeights(data);
-            for(int i = 0; i < 512; i++) {
-                g.drawLine(i,350,i,350-heights[i]);
-            }
-         }
+            toprint = histHeights(data);
+            repaint();
+        }
+    }
+ 
+    public void paint(Graphics g) {
+        for(int i = 0; i < 512; i++) {
+            g.drawLine(i,350,i,350-toprint[i]);
+        }
         g.drawString("frequency",250,5);
     }
 
