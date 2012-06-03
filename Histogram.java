@@ -2,6 +2,7 @@ import javax.swing.JPanel;
 import java.awt.Graphics;
 import java.awt.Dimension;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.lang.Math;
 
 public class Histogram extends JPanel implements Runnable {
 
@@ -14,6 +15,9 @@ public class Histogram extends JPanel implements Runnable {
         frame = myframe;
         data = new double[4096];
         toprint = new int[512];
+        for(int i = 0; i < 512; i++) {
+            toprint[i] = 0;
+        }
         queue = new LinkedBlockingQueue<double[]>();
         setPreferredSize(new Dimension(512,400)); //w,h in pixels
     }
@@ -28,27 +32,40 @@ public class Histogram extends JPanel implements Runnable {
                 data = queue.take();
             }
             catch(InterruptedException e) {
+                System.out.println("display:interrupted");
                 return;
             }
             toprint = histHeights(data);
             repaint();
         }
+        System.out.println("display:stopped");
     }
  
     public void paint(Graphics g) {
+        g.clearRect(0,0,512,350);
         for(int i = 0; i < 512; i++) {
             g.drawLine(i,350,i,350-toprint[i]);
         }
-        g.drawString("frequency",250,5);
+        g.drawString("frequency",225,395);
     }
 
-    public int[] histHeights(double[] data) {
+    private double biggest(double[] data) {
+        double largest = data[0];
+        for(int i = 1; i < 2048; i++) {
+            largest = Math.max(largest,data[i]);
+        }
+        return(largest);
+    }
+
+
+    private int[] histHeights(double[] data) {
         int i;
         double height;
+        double norm = biggest(data);
         int[] heights = new int[512];
         for(i = 0; i < 512; i++) {
-            height = data[i*4] + data[i*4 + 1] + data[i*4 + 2] + data[i*4 + 3];
-            height = height/1250 * 350;
+            height = data[i];
+            height = height/norm * 350;
             heights[i] = (int) height;
         }
         return(heights);

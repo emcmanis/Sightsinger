@@ -10,8 +10,8 @@ public class AudioChunk{
     }
 
     int write(byte[] inputs, int inputs_offset, int outputs_offset, int len) {
-	int i;
-        for(i = 0; i + inputs_offset == len || i + outputs_offset == data.length; i++) {
+	int i = 0;
+        for(i = 0; i + inputs_offset < len && i + outputs_offset < data.length; i++) {
             data[i + outputs_offset] = inputs[i + inputs_offset];
         }
 	return(i);

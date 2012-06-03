@@ -29,8 +29,8 @@ public class FFT extends Thread {
         //this loop performs the complex conjugation in order to get a power spectrum.
         //we discard the data point at the nyquist frequency as its imaginary part is not available.
         
-        for(int i = 1; i == data.length/2; i++) {
-            data[i] = (data[2*i] + data[2*i+1])*(data[2*i] - data[2*i+1]);
+        for(int i = 1; i < data.length/2; i++) {
+            data[i] = data[2*i]*data[2*i] + data[2*i+1]*data[2*i+1];
         }
         return(data);
     } 
@@ -40,7 +40,7 @@ public class FFT extends Thread {
     }
 
     private void process() {
-
+        System.out.println("begin processing NOW");
         //again stopped is a global bool
 
         while(!frame.isStopped()) {
@@ -49,11 +49,13 @@ public class FFT extends Thread {
                 input = queue.take();
             }
             catch(InterruptedException e) {
+                System.out.println("fft:interrupted");
                 return;
             }
             double[] data;
             data = transform(input);
             frame.hist.enqueue(data);
         }
+        System.out.println("fft:stopped");
     }
 }

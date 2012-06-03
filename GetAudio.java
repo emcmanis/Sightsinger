@@ -49,20 +49,19 @@ public class GetAudio extends Thread {
     }
 
     public void run() {
-        setup();
-        if(!frame.isStopped()) {
-            System.out.println("this should not be printing");
-            record();
-        }
+        System.out.println("Starting...");
+        record();
     }
 
     private void record() {
+        System.out.println("recording");
         // Assume that the TargetDataLine, line, has already
         // been obtained and opened.
         int numBytesRead = 0;
         int numBytesWrote = 0;
         int offset = 0;
         byte[] data = new byte[line.getBufferSize() / 5];
+        System.out.println(line.getBufferSize());
         //byte[] audio = new byte[2048]; //for testing purposes -- recording and playing back some samples.
 
         // Begin audio capture.
@@ -71,14 +70,21 @@ public class GetAudio extends Thread {
         while (!frame.isStopped()) {
             //this loop starts with an input/output offset, writes as many bytes as possible, then loops. Once the audioChunk is full, it ffts it.
             numBytesRead = line.read(data, 0, data.length);
-            while(numBytesWrote != numBytesRead) {
-                numBytesWrote = output.write(data, numBytesWrote, offset, output.data.length);
-                offset = numBytesWrote % output.data.length;
-                if(offset == 0) {
-                    frame.fft.enqueue(output);
-                    output = new AudioChunk();
+            if(numBytesRead != 0) {
+                numBytesWrote = 0;
+                while(numBytesWrote != numBytesRead) {
+                    numBytesWrote = numBytesWrote + output.write(data, numBytesWrote, offset, numBytesRead);
+                    offset = numBytesWrote % output.data.length;
+                    if(numBytesWrote == 0) {
+                        return;
+                    }
+                    if(offset == 0) {
+                        frame.fft.enqueue(output);
+                        output = new AudioChunk();
+                    }
                 }
             }
-        }  
+        }
+        System.out.println("stopped.");
     }
 }

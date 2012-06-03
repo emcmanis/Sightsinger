@@ -22,10 +22,11 @@ public class DataFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 stopped = false;
                 audioinput = new GetAudio(DataFrame.this);
-                audioinput.start(); 
-                if(stopped = false) {
+                audioinput.setup(); 
+                if(stopped == false) {
                     fft = new FFT(DataFrame.this);
                     fft.start();
+                    audioinput.start();
                     histthread.start();
                 }
             }
@@ -33,8 +34,18 @@ public class DataFrame extends JFrame {
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 stopped = true;
-                fft.interrupt();
-                histthread.interrupt();
+                try { 
+                    fft.interrupt();
+                }
+                catch(NullPointerException ex) {
+                    System.out.println("fft does not exist");
+                }
+                try {
+                    histthread.interrupt();
+                }
+                catch(NullPointerException ex) {
+                    System.out.println("histthread does not exist");
+                }
             }
         }
         );
