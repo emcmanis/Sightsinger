@@ -15,3 +15,8 @@ To compile, run (in the Sightsinger directory):
      java -cp ./:jtransforms-2.4.jar DataFrame
  
 I wrote and checked this on Ubuntu. It may or may not work on Windows. The microphone does not (appear to) work on OS X.
+
+Known issues:
+
+* The "start" button cannot be pressed after it has been stopped once
+* Pressing any button twice throws exceptions.
