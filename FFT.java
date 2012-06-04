@@ -40,7 +40,6 @@ public class FFT extends Thread {
     }
 
     private void process() {
-        System.out.println("begin processing NOW");
         //again stopped is a global bool
 
         while(!frame.isStopped()) {
@@ -49,13 +48,11 @@ public class FFT extends Thread {
                 input = queue.take();
             }
             catch(InterruptedException e) {
-                System.out.println("fft:interrupted");
                 return;
             }
             double[] data;
             data = transform(input);
             frame.hist.enqueue(data);
         }
-        System.out.println("fft:stopped");
     }
 }

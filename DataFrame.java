@@ -10,41 +10,47 @@ public class DataFrame extends JFrame {
     FFT fft;
     GetAudio audioinput;
     Histogram hist;
+    Thread histthread;
 
     public DataFrame() {
         setTitle("Histogram");
+        stopped = true;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         JButton start = new JButton("Start");
         JButton stop = new JButton("Stop");
         hist = new Histogram(this);	
-        final Thread histthread = new Thread(hist,"histthread");
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                stopped = false;
-                audioinput = new GetAudio(DataFrame.this);
-                audioinput.setup(); 
-                if(stopped == false) {
-                    fft = new FFT(DataFrame.this);
-                    fft.start();
-                    audioinput.start();
-                    histthread.start();
+                if(stopped == true) {
+                    stopped = false;
+                    audioinput = new GetAudio(DataFrame.this);
+                    audioinput.setup(); 
+                    if(stopped == false) {
+                        fft = new FFT(DataFrame.this);
+                        fft.start();
+                        histthread = new Thread(hist,"histthread");
+                        audioinput.start();
+                        histthread.start();
+                    }
                 }
             }
         });
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                stopped = true;
-                try { 
-                    fft.interrupt();
-                }
-                catch(NullPointerException ex) {
-                    System.out.println("fft does not exist");
-                }
-                try {
-                    histthread.interrupt();
-                }
-                catch(NullPointerException ex) {
-                    System.out.println("histthread does not exist");
+                if(stopped == false) {
+                    stopped = true;
+                    try { 
+                        fft.interrupt();
+                    }
+                    catch(NullPointerException ex) {
+                        System.out.println("fft does not exist");
+                    }
+                    try {
+                        histthread.interrupt();
+                    }
+                    catch(NullPointerException ex) {
+                        System.out.println("histthread does not exist");
+                    }
                 }
             }
         }

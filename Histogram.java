@@ -32,13 +32,11 @@ public class Histogram extends JPanel implements Runnable {
                 data = queue.take();
             }
             catch(InterruptedException e) {
-                System.out.println("display:interrupted");
                 return;
             }
             toprint = histHeights(data);
             repaint();
         }
-        System.out.println("display:stopped");
     }
  
     public void paint(Graphics g) {

@@ -54,14 +54,12 @@ public class GetAudio extends Thread {
     }
 
     private void record() {
-        System.out.println("recording");
         // Assume that the TargetDataLine, line, has already
         // been obtained and opened.
         int numBytesRead = 0;
         int numBytesWrote = 0;
         int offset = 0;
         byte[] data = new byte[line.getBufferSize() / 5];
-        System.out.println(line.getBufferSize());
         //byte[] audio = new byte[2048]; //for testing purposes -- recording and playing back some samples.
 
         // Begin audio capture.
@@ -85,6 +83,5 @@ public class GetAudio extends Thread {
                 }
             }
         }
-        System.out.println("stopped.");
     }
 }
