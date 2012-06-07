@@ -19,17 +19,14 @@ public class GetAudio extends Thread {
         frame = myframe;
     }
 
+    //this sets up the TargetDataLine for use recording. It's separate from the constructor so it can be retried if necessary.
+
     public void setup() {
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, output.format); // format is an AudioFormat object
         if (!AudioSystem.isLineSupported(info)) {
-            System.out.println("Something is wrong with this. Please fix and retry.");
-            System.out.println("microphone: ");
-            System.out.println(AudioSystem.isLineSupported(Port.Info.MICROPHONE));
-            System.out.println("line in: ");
-            System.out.println(AudioSystem.isLineSupported(Port.Info.LINE_IN));
-            frame.setStopped(true);
-            frame.setStopped(true);
-            return;
+            System.out.println("Something is wrong with this. Please fix and retry. If you're on OS X, your audio system is set up differently from everyone else's. I'm sorry.");
+            frame.setStopped(true); //set the DataFrame's stopped bool to true, preventing further execution.
+           return;
         }
         // Obtain and open the line.
         try {
@@ -39,10 +36,13 @@ public class GetAudio extends Thread {
             System.out.println("line is unavailable! Please fix and retry.");
             frame.setStopped(true);
         }
+
+        //anonymous LineListener to handle if the line is suddenly closed or stopped, preventing wasted system resources.
+
         line.addLineListener(new LineListener(){
             public void update(LineEvent event) {
-		if(event.getType() == LineEvent.Type.STOP || event.getType() == LineEvent.Type.CLOSE) {
-	            frame.setStopped(true);
+                if(event.getType() == LineEvent.Type.STOP || event.getType() == LineEvent.Type.CLOSE) {
+                    frame.setStopped(true);
                 }
             }
         });
@@ -60,7 +60,6 @@ public class GetAudio extends Thread {
         int numBytesWrote = 0;
         int offset = 0;
         byte[] data = new byte[line.getBufferSize() / 5];
-        //byte[] audio = new byte[2048]; //for testing purposes -- recording and playing back some samples.
 
         // Begin audio capture.
         line.start();
@@ -68,18 +67,13 @@ public class GetAudio extends Thread {
         while (!frame.isStopped()) {
             //this loop starts with an input/output offset, writes as many bytes as possible, then loops. Once the audioChunk is full, it ffts it.
             numBytesRead = line.read(data, 0, data.length);
-            if(numBytesRead != 0) {
-                numBytesWrote = 0;
-                while(numBytesWrote != numBytesRead) {
-                    numBytesWrote = numBytesWrote + output.write(data, numBytesWrote, offset, numBytesRead);
-                    offset = numBytesWrote % output.data.length;
-                    if(numBytesWrote == 0) {
-                        return;
-                    }
-                    if(offset == 0) {
-                        frame.fft.enqueue(output);
-                        output = new AudioChunk();
-                    }
+            numBytesWrote = 0;
+            while(numBytesWrote != numBytesRead) { //when numBytesWrote == numBytesRead, all the data has been copied and more data should be gathered.
+                numBytesWrote = numBytesWrote + output.write(data, numBytesWrote, offset, numBytesRead); //write as many bytes as possible, add to the number of bytes written
+                offset = numBytesWrote % output.data.length; //if this is zero, a whole chunk of data has been written, and it is ready to be FFT'd.
+                if(offset == 0) {
+                    frame.fft.enqueue(output); //queue up the old one
+                    output = new AudioChunk(); //get a new one.
                 }
             }
         }

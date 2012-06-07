@@ -12,9 +12,10 @@ public class Histogram extends JPanel implements Runnable {
     DataFrame frame;
 
     public Histogram(DataFrame myframe) {
-        frame = myframe;
+        frame = myframe; //again to allow stopped access
         data = new double[4096];
         toprint = new int[512];
+        //initialize the toprint array to zero, meaning the screen starts out clear.
         for(int i = 0; i < 512; i++) {
             toprint[i] = 0;
         }
@@ -40,13 +41,15 @@ public class Histogram extends JPanel implements Runnable {
     }
  
     public void paint(Graphics g) {
-        g.clearRect(0,0,512,350);
+        g.clearRect(0,0,512,350); //clears the area being drawn on 
         for(int i = 0; i < 512; i++) {
             g.drawLine(i,350,i,350-toprint[i]);
         }
         g.drawString("frequency",225,395);
     }
 
+    //this is purely a helper function -- I wanted to normalize my histogram so the largest frequency had a big line, so this just picks the largest frequency.
+    //it expects an array of data coming from the fft thread. Everything after 2048 is leftover junk from the transform.
     private double biggest(double[] data) {
         double largest = data[0];
         for(int i = 1; i < 2048; i++) {
@@ -55,16 +58,16 @@ public class Histogram extends JPanel implements Runnable {
         return(largest);
     }
 
-
+    //this method takes the data from the fft and turns it into an array of integers to be used to determine the heights of the bars i nthe histogram.
     private int[] histHeights(double[] data) {
         int i;
         double height;
-        double norm = biggest(data);
+        double norm = biggest(data); 
         int[] heights = new int[512];
-        for(i = 0; i < 512; i++) {
+        for(i = 0; i < 512; i++) { //this loop goes through the first 512 data points, completely disregarding the rest. Due to the frequency grid spacing, the other points will be above the range of the human voice, and thus unimportant to this particular application.
             height = data[i];
-            height = height/norm * 350;
-            heights[i] = (int) height;
+            height = height/norm * 350; //height/norm should be between 0 and 1; this picks what percentage of 350 pixels this line will take up.
+            heights[i] = (int) height; //finally, the drawLine method needs integers, so we cast to int. This will lose some information, but not much.
         }
         return(heights);
     }
