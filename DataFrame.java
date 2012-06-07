@@ -6,11 +6,11 @@ import java.awt.BorderLayout;
 
 public class DataFrame extends JFrame {
 
-    boolean stopped;
+    volatile boolean stopped;
     FFT fft;
     GetAudio audioinput;
     Histogram hist;
-    Thread histthread;
+    private Thread histthread;
 
     public DataFrame() {
         setTitle("Histogram");
@@ -20,7 +20,7 @@ public class DataFrame extends JFrame {
         JButton stop = new JButton("Stop");
         hist = new Histogram(this);	
         
-        //anonymous ActionListener class: starts recording, if recording has not already been started.
+        //starts recording, if recording has not already been started.
 
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -71,8 +71,6 @@ public class DataFrame extends JFrame {
         pack();
         setVisible(true);
     }
-
-    //these two methods exist so other threads can query and set "stopped".
 
     public void setStopped(boolean val) {
         stopped = val;
